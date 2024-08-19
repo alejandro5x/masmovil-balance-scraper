@@ -1,4 +1,4 @@
-### Panapass Balance Scraper with MQTT Integration
+### Masmovil Balance Scraper with MQTT Integration
 
 This repository contains a Python script designed to automate the retrieval of the Masmovil balance using [Playwright](https://playwright.dev/python), with the additional capability to publish the balance to an MQTT broker. Masmovil is a Cellphone provider in Panama, and this script facilitates the seamless acquisition of the balance, followed by its transmission to a specified MQTT topic. The script is configured to use an `.env` file for securely storing credentials and configuration settings.
 
