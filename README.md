@@ -42,11 +42,19 @@ This repository contains a Python script designed to automate the retrieval of t
 
 #### Usage:
 ```bash
-python scrape_balance.py
+python masmovil-balance-scraper.py
 ```
 
 #### Example Output:
 Upon execution, the script will retrieve the Masmovil balance and publish it to the specified MQTT broker and topic, as defined in the `.env` file:
 ```
-Published balance of $25.10 to MQTT topic 'masmovil/balance'.
+Published balance of $30.40 to MQTT topic 'masmovil/balance'.
 ```
+
+
+#### Crontab:
+At minute 0 past every hour
+```
+0 * * * * /bin/bash -l -c 'source /home/alex/python/masmovil-balance-scraper/bin/activate && python /home/alex/python/masmovil-balance-scraper/masmovil-balance-scraper.py' > /dev/null 2>&1
+```
+
