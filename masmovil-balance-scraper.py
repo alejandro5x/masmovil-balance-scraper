@@ -31,14 +31,13 @@ def run(playwright: Playwright) -> None:
         page.get_by_role("button", name="Pagar este número").click()
 
         # Getting balance
-        #balance_element = page.query_selector('//*[@id="mat-radio-11"]/label/span[2]/div/div[1]/p[1]')
         balance_element = page.inner_html('//*[@id="mat-radio-7"]/label/span[2]/div/div[1]/p[1]/span')
         if balance_element is None:
             raise ValueError("Element for balance not found.")
         
-        #balance = balance_element.text_content()
         balance = balance_element.replace("B/. ", "")
-        print(balance)
+        send_mqtt_data(mqtt_server, mqtt_port, mqtt_user, mqtt_password, mqtt_topic, balance)
+        send_mqtt_error(mqtt_server, mqtt_port, mqtt_user, mqtt_password, mqtt_error_topic, "")
     except (TimeoutError, ValueError) as e:
         error_message = f"Error getting balance: {str(e)}"
         print(error_message)
@@ -48,7 +47,6 @@ def run(playwright: Playwright) -> None:
         context.close()
         browser.close()
 
-    send_mqtt_data(mqtt_server, mqtt_port, mqtt_user, mqtt_password, mqtt_topic, balance)
 
 def send_mqtt_data(server, port, user, password, topic, balance):
     client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, mqtt_user)
