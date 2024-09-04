@@ -31,11 +31,16 @@ def run(playwright: Playwright) -> None:
         page.get_by_role("button", name="Pagar este número").click()
 
         # Getting balance
-        balance_element = page.inner_html('//*[@id="mat-radio-7"]/label/span[2]/div/div[1]/p[1]/span')
-        if balance_element is None:
-            raise ValueError("Element for balance not found.")
+        #balance_element = page.inner_html('//*[@id="mat-radio-7"]/label/span[2]/div/div[1]/p[1]/span')
+        #if balance_element is None:
+        #    raise ValueError("Element for balance not found.")
+        if page.locator('//*[@id="mat-radio-7"]').count() > 0:
+            balance_element = page.inner_html('//*[@id="mat-radio-7"]/label/span[2]/div/div[1]/p[1]/span')
+            balance = balance_element.replace("B/. ", "")
+        else:
+            balance = "0"
         
-        balance = balance_element.replace("B/. ", "")
+        #balance = balance_element.replace("B/. ", "")
         send_mqtt_data(mqtt_server, mqtt_port, mqtt_user, mqtt_password, mqtt_topic, balance)
         send_mqtt_error(mqtt_server, mqtt_port, mqtt_user, mqtt_password, mqtt_error_topic, "")
     except (TimeoutError, ValueError) as e:
