@@ -29,9 +29,7 @@ def run(playwright: Playwright) -> None:
         page.locator("#mat-radio-3 div").click()
         page.get_by_role("button", name="Continuar").click()
         page.locator("#care-app").press("Tab")
-        page.get_by_placeholder("-0000").fill("6400-1125")
-        #page.get_by_placeholder("-0000").fill("6206-7386")
-        #page.get_by_role("button", name="Pagar este número").click()
+        page.get_by_placeholder("-0000").fill(masmovil_phone)
         page.click('button[type=submit]')
 
         page.wait_for_timeout(9000)
