@@ -6,6 +6,7 @@ import time
 import paho.mqtt.client as mqtt
 import os
 import json
+from bs4 import BeautifulSoup
 
 load_dotenv()
 masmovil_phone = os.getenv('MASMOVIL_NUMBER')
@@ -18,6 +19,7 @@ mqtt_error_topic = os.getenv('MASMOVIL_MQTT_ERROR_TOPIC')  # Separate Topic for 
 
 def run(playwright: Playwright) -> None:
 
+    #browser = playwright.chromium.launch(headless=False, slow_mo=50)
     browser = playwright.chromium.launch(headless=True)
     context = browser.new_context()
     page = context.new_page()
@@ -28,19 +30,22 @@ def run(playwright: Playwright) -> None:
         page.get_by_role("button", name="Continuar").click()
         page.locator("#care-app").press("Tab")
         page.get_by_placeholder("-0000").fill("6400-1125")
-        page.get_by_role("button", name="Pagar este número").click()
+        #page.get_by_placeholder("-0000").fill("6206-7386")
+        #page.get_by_role("button", name="Pagar este número").click()
+        page.click('button[type=submit]')
 
+        page.wait_for_timeout(9000)
         # Getting balance
-        #balance_element = page.inner_html('//*[@id="mat-radio-7"]/label/span[2]/div/div[1]/p[1]/span')
-        #if balance_element is None:
-        #    raise ValueError("Element for balance not found.")
-        if page.locator('//*[@id="mat-radio-7"]').count() > 0:
-            balance_element = page.inner_html('//*[@id="mat-radio-7"]/label/span[2]/div/div[1]/p[1]/span')
-            balance = balance_element.replace("B/. ", "")
+        if page.locator('div.container').count() > 0:
+            html = page.inner_html('div.container')
+            soup = BeautifulSoup(html, 'html.parser')
+            #print(soup.find('span', {'class': 'bold ui-price-3'}).text)
+            balance_element = soup.find('span', {'class': 'bold ui-price-3'}).text
         else:
-            balance = "0"
-        
-        #balance = balance_element.replace("B/. ", "")
+            balance_element = "B/. 0.00"
+        #balance_element = page.inner_html('//*[@id="mat-radio-7"]/label/span[2]/div/div[1]/p[1]/span')
+        balance = balance_element.replace("B/. ", "")
+        print(balance)
         send_mqtt_data(mqtt_server, mqtt_port, mqtt_user, mqtt_password, mqtt_topic, balance)
         send_mqtt_error(mqtt_server, mqtt_port, mqtt_user, mqtt_password, mqtt_error_topic, "")
     except (TimeoutError, ValueError) as e:
@@ -58,13 +63,13 @@ def send_mqtt_data(server, port, user, password, topic, balance):
     client.username_pw_set(user, password)
     client.connect(server, port)
     client.loop_start()
-    
+
     xpayload = json.dumps({
         "state": str(balance),
         "updated_ts": str(int(time.time())),
         "updated_dt": str(datetime.now())
     }, sort_keys=True, default=str)
-    
+
     client.publish(topic=topic, payload=xpayload, qos=0, retain=False)
     time.sleep(1)
     client.loop_stop()
@@ -74,13 +79,13 @@ def send_mqtt_error(server, port, user, password, topic, error_message):
     client.username_pw_set(user, password)
     client.connect(server, port)
     client.loop_start()
-    
+
     xpayload = json.dumps({
         "error": error_message,
         "updated_ts": str(int(time.time())),
         "updated_dt": str(datetime.now())
     }, sort_keys=True, default=str)
-    
+
     client.publish(topic=topic, payload=xpayload, qos=0, retain=False)
     time.sleep(1)
     client.loop_stop()
