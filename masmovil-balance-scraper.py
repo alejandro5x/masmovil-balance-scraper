@@ -26,7 +26,11 @@ def run(playwright: Playwright) -> None:
     page.goto("https://pagoexpress.masmovilpanama.com/paybill")
 
     try:
-        page.locator("#mat-radio-3 div").click()
+        page.get_by_text("Cuenta a pagar").click()
+        page.locator("#care-app").press("Tab")
+        page.locator("#mat-radio-2-input").press("ArrowDown")
+
+        #page.locator("#mat-radio-3 div").click()
         page.get_by_role("button", name="Continuar").click()
         page.locator("#care-app").press("Tab")
         page.get_by_placeholder("-0000").fill(masmovil_phone)
