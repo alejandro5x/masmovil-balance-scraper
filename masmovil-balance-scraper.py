@@ -24,6 +24,7 @@ def run(playwright: Playwright) -> None:
     context = browser.new_context()
     page = context.new_page()
     page.goto("https://pagoexpress.masmovilpanama.com/paybill")
+    page.wait_for_timeout(9000)
 
     try:
         page.get_by_text("Cuenta a pagar").click()
@@ -38,7 +39,8 @@ def run(playwright: Playwright) -> None:
 
         page.wait_for_timeout(9000)
         # Getting balance
-        if page.locator('div.container').count() > 0:
+        #if page.locator('div.container').count() > 0:
+        if page.get_by_text('Pagar lo vencido').count() > 0:
             html = page.inner_html('div.container')
             soup = BeautifulSoup(html, 'html.parser')
             #print(soup.find('span', {'class': 'bold ui-price-3'}).text)
